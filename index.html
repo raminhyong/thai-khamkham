@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>คำคม · เกมต่อคำภาษาไทย</title>
-<meta name="description" content="เกมคำคม (Thai Scrabble-like) กระดาน 11x11 ตรวจคำกับพจนานุกรมไทย เล่น 2 คนบนมือถือ" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>คำคม · เกมฝึกคำศัพท์ภาษาไทย</title>
+<meta name="description" content="เกมคำคมตามกติกาทางการ — กระดาน 15x9 ตรวจคำกับพจนานุกรมราชบัณฑิตฯ ฝึกนักเรียนกับบอท" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -14,7 +14,7 @@
       <span class="logo">คม</span>
       <div>
         <h1>คำคม</h1>
-        <p class="sub">ต่อคำบนกระดาน · ตรวจคำอัตโนมัติ</p>
+        <p class="sub" id="sub">กำลังโหลดข้อมูล…</p>
       </div>
     </div>
     <button id="btn-new" class="btn btn-ghost" type="button">เกมใหม่</button>
@@ -22,57 +22,91 @@
 
   <section class="scores">
     <div class="score glass" id="p0">
-      <span class="who">ผู้เล่น 1</span>
+      <span class="who" id="n0">ผู้เล่น 1</span>
       <strong id="s0">0</strong>
     </div>
-    <div class="turn" id="turnLabel">ตาของผู้เล่น 1</div>
+    <div class="turn" id="turnLabel">—</div>
     <div class="score glass" id="p1">
-      <span class="who">ผู้เล่น 2</span>
+      <span class="who" id="n1">ผู้เล่น 2</span>
       <strong id="s1">0</strong>
     </div>
   </section>
 
-  <div class="board-wrap glass">
-    <div id="board" class="board" role="grid" aria-label="กระดานคำคม 15 คอลัมน์ 9 แถว"></div>
-  </div>
-
-  <section class="preview glass" id="preview">
-    <span class="preview-label">คำที่กำลังวาง</span>
-    <span class="preview-words" id="previewWords">—</span>
-    <span class="preview-score" id="previewScore"></span>
-  </section>
-
-  <section class="tray">
-    <div class="rack" id="rack" aria-label="เบี้ยในมือ"></div>
-    <div class="palette" id="palette" aria-label="สระและวรรณยุกต์"></div>
-    <div class="actions">
-      <button id="btn-play" class="btn btn-primary" type="button">เล่น</button>
-      <button id="btn-recall" class="btn btn-soft" type="button">เก็บเบี้ย</button>
-      <button id="btn-exchange" class="btn btn-soft" type="button">เปลี่ยนเบี้ย</button>
-      <button id="btn-pass" class="btn btn-soft" type="button">ผ่านตา</button>
+  <main class="play-area">
+    <div class="board-wrap glass">
+      <div id="board" class="board" role="grid" aria-label="กระดานคำคม 15 คอลัมน์ 9 แถว"></div>
     </div>
-  </section>
+
+    <aside class="side">
+      <section class="preview glass" id="preview">
+        <span class="preview-label">คำที่กำลังวาง</span>
+        <span class="preview-words" id="previewWords">—</span>
+        <span class="preview-score" id="previewScore"></span>
+      </section>
+
+      <div class="rack" id="rack" aria-label="เบี้ยในมือ"></div>
+      <div class="palette" id="palette" aria-label="สระบน-ล่างและวรรณยุกต์ (เบี้ยกระดาษ)"></div>
+
+      <div class="actions">
+        <button id="btn-play" class="btn btn-primary" type="button">เล่น</button>
+        <button id="btn-recall" class="btn btn-soft" type="button">เก็บเบี้ย</button>
+        <button id="btn-exchange" class="btn btn-soft" type="button">เปลี่ยนเบี้ย</button>
+        <button id="btn-pass" class="btn btn-soft" type="button">ผ่านตา</button>
+      </div>
+    </aside>
+  </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- หน้าตั้งเกม -->
+  <div id="setup" class="modal" hidden>
+    <div class="modal-card glass">
+      <h2>เริ่มเกมคำคม</h2>
+      <p class="muted">กระดาน 15×9 · เบี้ย 104 ตัว · กติกาทางการ EduPLOYS</p>
+
+      <fieldset>
+        <legend>โหมดเล่น</legend>
+        <label class="opt"><input type="radio" name="mode" value="bot" checked /> เล่นกับบอท</label>
+        <label class="opt"><input type="radio" name="mode" value="local" /> 2 คนบนเครื่องเดียว</label>
+      </fieldset>
+
+      <fieldset id="levelBox">
+        <legend>ระดับบอท</legend>
+        <label class="opt"><input type="radio" name="level" value="easy" /> ง่าย (เล่นพลาดได้)</label>
+        <label class="opt"><input type="radio" name="level" value="medium" checked /> ปานกลาง</label>
+        <label class="opt"><input type="radio" name="level" value="hard" /> ยาก (หาคะแนนสูงสุด)</label>
+      </fieldset>
+
+      <button id="btn-start" class="btn btn-primary wide" type="button">เริ่มเล่น</button>
+    </div>
+  </div>
+
+  <!-- สรุปผล -->
+  <div id="summary" class="modal" hidden>
+    <div class="modal-card glass wide-card">
+      <h2 id="summaryTitle">จบเกม</h2>
+      <p class="muted" id="summaryReason"></p>
+      <table class="log">
+        <thead><tr><th>#</th><th>ผู้เล่น</th><th>คำที่เล่น</th><th>คะแนน</th></tr></thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+      <button id="btn-again" class="btn btn-primary wide" type="button">เล่นอีกครั้ง</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="js/app.js"></script>
 <script>
-  // ?debug=1 → รายงานขนาด layout ลง <title> เพื่อตรวจอัตโนมัติ
   if (new URLSearchParams(location.search).has('debug')) {
     addEventListener('load', () => setTimeout(() => {
       const b = document.getElementById('board');
-      const rack = document.getElementById('rack');
       document.title = JSON.stringify({
         vw: innerWidth,
-        scrollW: document.documentElement.scrollWidth,
         board: Math.round(b.getBoundingClientRect().width),
         cell: Math.round(b.querySelector('.cell')?.getBoundingClientRect().width || 0),
-        rackW: Math.round(rack.scrollWidth),
-        rackBox: Math.round(rack.getBoundingClientRect().width),
         cols: getComputedStyle(b).gridTemplateColumns.split(' ').length,
       });
-    }, 1200));
+    }, 1500));
   }
 </script>
 </body>
