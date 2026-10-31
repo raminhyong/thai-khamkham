@@ -1,75 +1,78 @@
 import assert from 'node:assert';
-import { emptyBoard, validateMove, cellText, SIZE } from '../js/rules.mjs';
+import { readFileSync } from 'node:fs';
+import { ROWS, COLS, CENTER, emptyBoard, validateMove, liftOld, cellText, BINGO } from '../js/rules.mjs';
 
-const val = () => 1;
-const mid = Math.floor(SIZE / 2);
+const layout = JSON.parse(readFileSync(new URL('../data/board.json', import.meta.url))).cells;
+const tiles = JSON.parse(readFileSync(new URL('../data/tiles.json', import.meta.url))).tiles;
+const tileValue = (ch) => tiles[ch]?.value ?? 1;
+const dict = new Set(['มา', 'ดี', 'กขคงจฉ']);
+const [cr, cc] = CENTER;
 
-// 1) ตาแรกผ่านช่องดาวกลาง → ผ่าน
+// 1) ผังกระดาน: 9 แถว x 15 คอลัมน์ = 135 ช่อง
+assert.equal(layout.length, ROWS);
+assert.ok(layout.every((r) => r.length === COLS));
+assert.equal(ROWS * COLS, 135);
+
+// 2) ตาแรกผ่านดาวกลาง → ผ่าน (ดาวกลางเป็น W2 = x2 คำ)
 {
-  const board = emptyBoard();
-  const res = validateMove(board, [
-    { r: mid, c: mid - 1, c_: 'ม' },
-    { r: mid, c: mid, c_: 'า' },
-  ], new Set(['มา']), val);
+  const res = validateMove({ board: emptyBoard(), layout, dict, tileValue, placements: [
+    { r: cr, c: cc - 1, c_: 'ม' }, { r: cr, c: cc, c_: 'า' },
+  ]});
   assert.equal(res.ok, true, res.error);
   assert.equal(res.words[0].text, 'มา');
-  assert.equal(res.total, 2 * 2, 'ดาวกลางต้องคูณ 2: ' + res.total);
+  assert.equal(res.total, 4, 'ได้ ' + res.total);
 }
 
-// 2) ตาแรกไม่ผ่านกลาง → ปฏิเสธ
+// 3) ตาแรกไม่ผ่านกลาง → ปฏิเสธ
 {
-  const res = validateMove(emptyBoard(), [
+  const res = validateMove({ board: emptyBoard(), layout, dict, tileValue, placements: [
     { r: 0, c: 0, c_: 'ม' }, { r: 0, c: 1, c_: 'า' },
-  ], new Set(['มา']), val);
+  ]});
   assert.equal(res.ok, false);
   assert.match(res.error, /ดาวกลาง/);
 }
 
-// 3) คำไม่อยู่ในพจนานุกรม → ปฏิเสธ
+// 4) คำไม่อยู่ในพจนานุกรม → ปฏิเสธ
 {
-  const res = validateMove(emptyBoard(), [
-    { r: mid, c: mid - 1, c_: 'ม' }, { r: mid, c: mid, c_: 'า' },
-  ], new Set(['ดี']), val);
+  const res = validateMove({ board: emptyBoard(), layout, dict, tileValue, placements: [
+    { r: cr, c: cc - 1, c_: 'ด' }, { r: cr, c: cc, c_: 'า' },
+  ]});
   assert.equal(res.ok, false);
   assert.match(res.error, /ไม่พบคำ/);
 }
 
-// 4) วางไม่ติดกัน → ปฏิเสธ
+// 5) วางไม่ติดกัน → ปฏิเสธ
 {
-  const res = validateMove(emptyBoard(), [
-    { r: mid, c: mid, c_: 'ม' }, { r: mid, c: mid + 2, c_: 'า' },
-  ], new Set(['มา']), val);
+  const res = validateMove({ board: emptyBoard(), layout, dict, tileValue, placements: [
+    { r: cr, c: cc, c_: 'ม' }, { r: cr, c: cc + 2, c_: 'า' },
+  ]});
   assert.equal(res.ok, false);
   assert.match(res.error, /ติดกัน/);
 }
 
-// 5) ตาที่สองต่อกับเบี้ยเดิม + คำตัดขวางต้องถูกต้อง
+// 6) ยกคำเก่า: เหลือเฉพาะเบี้ยของคำล่าสุด
 {
-  const board = emptyBoard();
-  board[mid][mid] = { c: 'ม', v: '', t: '' };
-  board[mid][mid + 1] = { c: 'า', v: '', t: '' };  // "มา"
-  const res = validateMove(board, [
-    { r: mid - 1, c: mid, c_: 'ดี'[0] }, // ด
-    { r: mid - 2, c: mid, c_: 'ี' },
-  ], new Set(['มา', 'ดี']), val);
-  assert.equal(res.ok, false, 'ควรปฏิเสธเพราะ ดี ต้องมี ด + ี ในช่องเดียว');
+  const b = emptyBoard();
+  b[cr][cc - 1] = { c: 'ม' };
+  b[cr][cc] = { c: 'า' };
+  const kept = liftOld(b, [{ cells: [[cr, cc]] }]);
+  assert.equal(kept[cr][cc].c, 'า');
+  assert.equal(kept[cr][cc - 1], null);
 }
 
-// 6) cellText ประกอบสระหน้า/หลังถูกต้อง
+// 7) โบนัสบิงโก 6-9 ตัว
+assert.deepEqual(BINGO, { 6: 40, 7: 50, 8: 70, 9: 90 });
 {
-  assert.equal(cellText({ c: 'ก', v: 'า', t: '' }), 'กา');
-  assert.equal(cellText({ c: 'ก', v: 'เ', t: '' }), 'เก');
-  assert.equal(cellText({ c: 'ก', v: 'ี', t: '้' }), 'กี้');
-}
-
-// 7) บิงโก: ใช้ 9 ตัว → +50
-{
-  const board = emptyBoard();
-  const word = 'กขคงจฉชซญ';
-  const placements = [...word].map((ch, i) => ({ r: mid, c: i + 1, c_: ch }));
-  const res = validateMove(board, placements, new Set([word]), val);
+  const word = 'กขคงจฉ';
+  const res = validateMove({ board: emptyBoard(), layout, dict, tileValue,
+    placements: [...word].map((ch, i) => ({ r: cr, c: i + 4, c_: ch })) });
   assert.equal(res.ok, true, res.error);
-  assert.ok(res.total >= 50, 'ต้องได้โบนัสบิงโก');
+  assert.equal(res.bingo, 40);
 }
 
-console.log('✅ ผ่านทั้ง 7 เทสต์');
+// 8) cellText: สระหน้า/หลัง/วรรณยุกต์
+assert.equal(cellText({ c: 'ก', v: 'า' }), 'กา');
+assert.equal(cellText({ c: 'ก', v: 'เ' }), 'เก');
+assert.equal(cellText({ c: 'ก', v: 'ี', t: '้' }), 'กี้');
+
+console.log('✅ ผ่านทั้ง 8 เทสต์ (กระดาน 15x9 · ยกคำเก่า · บิงโก 40/50/70/90)');

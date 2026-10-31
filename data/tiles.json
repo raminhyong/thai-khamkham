@@ -1,0 +1,186 @@
+{
+ "source": "refs/tile-scores.md (Box/KamKom/คะแนนของเบี้ยแต่ละตัว.md)",
+ "total_tiles": 104,
+ "tiles": {
+  "ก": {
+   "value": 1,
+   "count": 4
+  },
+  "ข": {
+   "value": 3,
+   "count": 2
+  },
+  "ค": {
+   "value": 2,
+   "count": 2
+  },
+  "ฆ/ซ": {
+   "value": 6,
+   "count": 1
+  },
+  "ง": {
+   "value": 1,
+   "count": 3
+  },
+  "จ": {
+   "value": 2,
+   "count": 2
+  },
+  "ฉ": {
+   "value": 6,
+   "count": 1
+  },
+  "ช": {
+   "value": 3,
+   "count": 2
+  },
+  "ฌ/ษ": {
+   "value": 8,
+   "count": 1
+  },
+  "ฤ/ฎ": {
+   "value": 7,
+   "count": 1
+  },
+  "ฐ/ฑ": {
+   "value": 6,
+   "count": 1
+  },
+  "ฒ/ณ": {
+   "value": 7,
+   "count": 1
+  },
+  "ด": {
+   "value": 1,
+   "count": 3
+  },
+  "ต": {
+   "value": 3,
+   "count": 2
+  },
+  "ถ": {
+   "value": 4,
+   "count": 1
+  },
+  "ท": {
+   "value": 2,
+   "count": 2
+  },
+  "ธ": {
+   "value": 5,
+   "count": 1
+  },
+  "น": {
+   "value": 1,
+   "count": 3
+  },
+  "บ": {
+   "value": 1,
+   "count": 3
+  },
+  "ป": {
+   "value": 3,
+   "count": 2
+  },
+  "ผ": {
+   "value": 3,
+   "count": 1
+  },
+  "ฝ": {
+   "value": 4,
+   "count": 1
+  },
+  "พ": {
+   "value": 3,
+   "count": 2
+  },
+  "ฟ": {
+   "value": 4,
+   "count": 2
+  },
+  "ภ": {
+   "value": 7,
+   "count": 1
+  },
+  "ม": {
+   "value": 1,
+   "count": 3
+  },
+  "ย": {
+   "value": 1,
+   "count": 3
+  },
+  "ร": {
+   "value": 1,
+   "count": 3
+  },
+  "ล": {
+   "value": 1,
+   "count": 3
+  },
+  "ว": {
+   "value": 1,
+   "count": 3
+  },
+  "ศ/ฤ": {
+   "value": 6,
+   "count": 1
+  },
+  "ส": {
+   "value": 3,
+   "count": 3
+  },
+  "ห": {
+   "value": 4,
+   "count": 2
+  },
+  "ฬ/ญ": {
+   "value": 8,
+   "count": 1
+  },
+  "อ": {
+   "value": 1,
+   "count": 3
+  },
+  "ฮ/ฦ": {
+   "value": 6,
+   "count": 1
+  },
+  "า": {
+   "value": 1,
+   "count": 5
+  },
+  "ำ": {
+   "value": 2,
+   "count": 2
+  },
+  "เ": {
+   "value": 1,
+   "count": 5
+  },
+  "แ": {
+   "value": 2,
+   "count": 4
+  },
+  "ไ": {
+   "value": 2,
+   "count": 2
+  },
+  "ใ": {
+   "value": 2,
+   "count": 2
+  },
+  "โ": {
+   "value": 2,
+   "count": 3
+  },
+  "ะ": {
+   "value": 1,
+   "count": 6
+  },
+  "ตัวว่าง": {
+   "value": 0,
+   "count": 4
+  }
+ }
+}

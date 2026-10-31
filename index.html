@@ -33,7 +33,7 @@
   </section>
 
   <div class="board-wrap glass">
-    <div id="board" class="board" role="grid" aria-label="กระดานคำคม"></div>
+    <div id="board" class="board" role="grid" aria-label="กระดานคำคม 15 คอลัมน์ 9 แถว"></div>
   </div>
 
   <section class="preview glass" id="preview">
@@ -48,6 +48,7 @@
     <div class="actions">
       <button id="btn-play" class="btn btn-primary" type="button">เล่น</button>
       <button id="btn-recall" class="btn btn-soft" type="button">เก็บเบี้ย</button>
+      <button id="btn-exchange" class="btn btn-soft" type="button">เปลี่ยนเบี้ย</button>
       <button id="btn-pass" class="btn btn-soft" type="button">ผ่านตา</button>
     </div>
   </section>
@@ -55,7 +56,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/app.js"></script>
 <script>
   // ?debug=1 → รายงานขนาด layout ลง <title> เพื่อตรวจอัตโนมัติ
   if (new URLSearchParams(location.search).has('debug')) {
