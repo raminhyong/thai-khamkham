@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>คำคม · เกมต่อคำภาษาไทย</title>
+<meta name="description" content="เกมคำคม (Thai Scrabble-like) กระดาน 11x11 ตรวจคำกับพจนานุกรมไทย เล่น 2 คนบนมือถือ" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <header class="topbar glass">
+    <div class="brand">
+      <span class="logo">คม</span>
+      <div>
+        <h1>คำคม</h1>
+        <p class="sub">ต่อคำบนกระดาน · ตรวจคำอัตโนมัติ</p>
+      </div>
+    </div>
+    <button id="btn-new" class="btn btn-ghost" type="button">เกมใหม่</button>
+  </header>
+
+  <section class="scores">
+    <div class="score glass" id="p0">
+      <span class="who">ผู้เล่น 1</span>
+      <strong id="s0">0</strong>
+    </div>
+    <div class="turn" id="turnLabel">ตาของผู้เล่น 1</div>
+    <div class="score glass" id="p1">
+      <span class="who">ผู้เล่น 2</span>
+      <strong id="s1">0</strong>
+    </div>
+  </section>
+
+  <div class="board-wrap glass">
+    <div id="board" class="board" role="grid" aria-label="กระดานคำคม"></div>
+  </div>
+
+  <section class="preview glass" id="preview">
+    <span class="preview-label">คำที่กำลังวาง</span>
+    <span class="preview-words" id="previewWords">—</span>
+    <span class="preview-score" id="previewScore"></span>
+  </section>
+
+  <section class="tray">
+    <div class="rack" id="rack" aria-label="เบี้ยในมือ"></div>
+    <div class="palette" id="palette" aria-label="สระและวรรณยุกต์"></div>
+    <div class="actions">
+      <button id="btn-play" class="btn btn-primary" type="button">เล่น</button>
+      <button id="btn-recall" class="btn btn-soft" type="button">เก็บเบี้ย</button>
+      <button id="btn-pass" class="btn btn-soft" type="button">ผ่านตา</button>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+<script>
+  // ?debug=1 → รายงานขนาด layout ลง <title> เพื่อตรวจอัตโนมัติ
+  if (new URLSearchParams(location.search).has('debug')) {
+    addEventListener('load', () => setTimeout(() => {
+      const b = document.getElementById('board');
+      const rack = document.getElementById('rack');
+      document.title = JSON.stringify({
+        vw: innerWidth,
+        scrollW: document.documentElement.scrollWidth,
+        board: Math.round(b.getBoundingClientRect().width),
+        cell: Math.round(b.querySelector('.cell')?.getBoundingClientRect().width || 0),
+        rackW: Math.round(rack.scrollWidth),
+        rackBox: Math.round(rack.getBoundingClientRect().width),
+        cols: getComputedStyle(b).gridTemplateColumns.split(' ').length,
+      });
+    }, 1200));
+  }
+</script>
+</body>
+</html>
