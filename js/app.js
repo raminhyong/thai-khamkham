@@ -73,7 +73,21 @@ const MULT_TEXT = { W2: '×2 คำ', W3: '×3 คำ', L2: '×2', L3: '×3', L4
 function renderBoard() {
   BOARD_EL.style.setProperty('--cols', COLS);
   BOARD_EL.innerHTML = '';
-  for (let r = 0; r < ROWS; r++) {
+  for (let r = 0; r < ROWS + 1; r++) {
+    // แถบสระ/วรรณยุกต์เหนือแต่ละแถว (+ แถบล่างสุด) = 10 แถบ x 15 ช่อง = 150 ช่อง
+    const strip = document.createElement('div');
+    strip.className = 'strip-row';
+    for (let c = 0; c < COLS; c++) {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      const pend = state.pending.find((p) => p.r === r && p.c === c);
+      const cell = pend ? { marks: pend.marks } : state.board[r]?.[c];
+      if (cell && cell.marks) slot.textContent = cell.marks;
+      strip.appendChild(slot);
+    }
+    BOARD_EL.appendChild(strip);
+    if (r === ROWS) break;
+
     for (let c = 0; c < COLS; c++) {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -99,7 +113,6 @@ function renderBoard() {
 function cellHTML(cell, cls = '', value = null) {
   return `<span class="tile ${cls}">
     <span class="mid">${cell.t === '?' ? '★' : cell.t}</span>
-    ${cell.marks ? `<span class="marks">${cell.marks}</span>` : ''}
     ${value !== null ? `<span class="val">${value}</span>` : ''}
   </span>`;
 }
