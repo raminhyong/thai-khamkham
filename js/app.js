@@ -98,9 +98,8 @@ function renderBoard() {
 
 function cellHTML(cell, cls = '', value = null) {
   return `<span class="tile ${cls}">
-    <span class="top"></span>
     <span class="mid">${cell.t === '?' ? '★' : cell.t}</span>
-    <span class="bot">${cell.marks || ''}</span>
+    ${cell.marks ? `<span class="marks">${cell.marks}</span>` : ''}
     ${value !== null ? `<span class="val">${value}</span>` : ''}
   </span>`;
 }
