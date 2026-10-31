@@ -56,6 +56,12 @@
     </aside>
   </main>
 
+  <div id="roomBar" class="room-bar glass" hidden>
+    <span>ห้อง <strong id="roomCode">—</strong></span>
+    <button id="btn-copy-link" class="btn btn-ghost" type="button">คัดลอกลิงก์เชิญ</button>
+    <button id="btn-room-start" class="btn btn-primary btn-sm" type="button">เริ่มเล่น</button>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- หน้าตั้งเกม -->
@@ -78,6 +84,18 @@
       </fieldset>
 
       <button id="btn-start" class="btn btn-primary wide" type="button">เริ่มเล่น</button>
+
+      <hr class="sep" />
+      <fieldset>
+        <legend>เล่นกับเพื่อน 2 เครื่อง</legend>
+        <div class="row">
+          <button id="btn-create-room" class="btn btn-soft" type="button">สร้างห้อง</button>
+          <input id="inp-code" class="code" placeholder="รหัสห้อง" maxlength="6" />
+          <button id="btn-join-room" class="btn btn-soft" type="button">เข้าห้อง</button>
+        </div>
+        <label class="opt small"><input type="checkbox" id="chk-challenge" /> ใช้โหมด Challenge (ลงคำก่อนแล้วค่อยตรวจ)</label>
+        <p class="muted small">ส่งลิงก์ให้เพื่อนเปิดบนอีกเครื่อง แล้วกด "เริ่มเล่น" เมื่อเข้าครบ 2 คน</p>
+      </fieldset>
     </div>
   </div>
 

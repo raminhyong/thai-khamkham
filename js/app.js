@@ -3,6 +3,7 @@ import {
   makeBag, draw, rackValue, makeTileValue,
 } from './rules.mjs';
 import { botMove } from './bot.mjs';
+import { Net } from './net.js';
 
 const $ = (id) => document.getElementById(id);
 const BOARD_EL = $('board');
@@ -17,7 +18,45 @@ const state = {
   board: null, bag: [], racks: [[], []], scores: [0, 0],
   turn: 0, pending: [], selected: null, passes: 0, over: false,
   mode: 'bot', level: 'medium', names: ['ผู้เล่น 1', 'บอท'], log: [], think: false,
+  myIdx: 0, netMode: false, roomCode: null, canStart: false,
 };
+
+const net = new Net({
+  onJoined: (m) => {
+    state.myIdx = (m.view?.ids || []).indexOf(m.playerId);
+    state.rackFromServer = m.rack;
+    applyView(m.view, m.rack);
+  },
+  onState: (m) => {
+    state.myIdx = (m.view?.ids || []).indexOf(m.you);
+    applyView(m.view, m.rack);
+  },
+  onError: (msg) => toast(msg, 3200),
+  onStatus: (s) => { if (s === 'closed') toast('การเชื่อมต่อห้องหลุด', 3200); },
+});
+
+function applyView(view, rack) {
+  if (!view) return;
+  state.netMode = true;
+  state.roomCode = view.code;
+  state.board = view.board;
+  state.names = view.names;
+  state.scores = view.scores;
+  state.turn = view.turn;
+  state.status = view.status;
+  state.racks[state.myIdx] = rack || [];
+  state.racks[1 - state.myIdx] = state.racks[1 - state.myIdx] || [];
+  $('roomBar').hidden = false;
+  $('roomCode').textContent = view.code;
+  $('btn-room-start').hidden = view.status === 'playing';
+  state.canStart = view.status === 'waiting' && view.names.length === 2;
+  if (view.status === 'finished') {
+    state.over = true;
+    endGame('จบเกม (ออนไลน์)');
+    return;
+  }
+  renderAll();
+}
 
 let toastTimer;
 function toast(msg, ms = 2400) {
@@ -172,8 +211,11 @@ function renderScores() {
     : state.think
       ? 'บอทกำลังคิด…'
       : `ตา: ${state.names[state.turn]} · ในถุง ${state.bag.length}`;
-  const isBot = state.mode === 'bot' && state.turn === 1;
-  ['btn-play', 'btn-recall', 'btn-exchange', 'btn-pass'].forEach((id) => { $(id).disabled = isBot || state.over; });
+  const myTurn = state.netMode ? state.turn === state.myIdx && state.status === 'playing' : true;
+  const isBot = !state.netMode && state.mode === 'bot' && state.turn === 1;
+  ['btn-play', 'btn-recall', 'btn-exchange', 'btn-pass'].forEach((id) => {
+    $(id).disabled = isBot || state.over || !myTurn;
+  });
 }
 
 /* ---------- โต้ตอบ ---------- */
@@ -221,6 +263,11 @@ function applyMove(res, who) {
 
 function submit() {
   if (state.over || state.think) return;
+  if (state.netMode) {
+    if (!state.pending.length) return toast('ยังไม่ได้วางเบี้ย');
+    net.move(toPlacements());
+    return;
+  }
   const res = validateMove({ board: state.board, layout: state.layout, placements: toPlacements(), dict: state.dict, tileValue: state.tileValue });
   if (!res.ok) return toast(res.error);
   const who = state.turn;
@@ -303,6 +350,7 @@ function recall() {
 
 function pass() {
   if (state.over) return;
+  if (state.netMode) { recall(); net.pass(); return; }
   recall();
   state.passes += 1;
   state.turn = 1 - state.turn;
@@ -317,6 +365,13 @@ function pass() {
 
 function exchange() {
   if (state.over) return;
+  if (state.netMode) {
+    if (state.selected === null) return toast('เลือกเบี้ยที่ต้องการเปลี่ยนก่อน');
+    const tile = state.racks[state.myIdx][state.selected];
+    state.selected = null;
+    net.exchange(tile.t);
+    return;
+  }
   if (state.selected === null) return toast('เลือกเบี้ยที่ต้องการเปลี่ยนก่อน');
   if (state.bag.length < 9) return toast('เปลี่ยนไม่ได้ — ในถุงเหลือน้อยกว่า 9 ตัว');
   const out = state.racks[state.turn].splice(state.selected, 1)[0];
@@ -354,9 +409,44 @@ document.querySelectorAll('input[name=mode]').forEach((el) => el.addEventListene
   $('levelBox').classList.toggle('dim', !isBot);
 }));
 
+/* ---------- ออนไลน์ ---------- */
+$('btn-create-room').addEventListener('click', async () => {
+  const check = $('chk-challenge').checked ? 'challenge' : 'auto';
+  try {
+    const code = await net.create(check);
+    history.replaceState(null, '', `?room=${code}`);
+    SETUP.hidden = true;
+    toast(`สร้างห้อง ${code} แล้ว — ส่งลิงก์ให้เพื่อน`);
+  } catch (e) { toast('สร้างห้องไม่สำเร็จ'); }
+});
+
+$('btn-join-room').addEventListener('click', async () => {
+  const code = ($('inp-code').value || '').trim().toUpperCase();
+  if (code.length < 4) return toast('ใส่รหัสห้องให้ครบ');
+  try {
+    await net.connect(code);
+    history.replaceState(null, '', `?room=${code}`);
+    SETUP.hidden = true;
+  } catch { toast('เข้าห้องไม่สำเร็จ'); }
+});
+
+$('btn-copy-link').addEventListener('click', async () => {
+  const link = `${location.origin}${location.pathname}?room=${state.roomCode}`;
+  try { await navigator.clipboard.writeText(link); toast('คัดลอกลิงก์แล้ว'); }
+  catch { prompt('คัดลอกลิงก์นี้:', link); }
+});
+
+$('btn-room-start').addEventListener('click', () => {
+  if (!state.canStart) return toast('ต้องรอผู้เล่นคนที่ 2 เข้าห้องก่อน');
+  net.start();
+});
+
 loadData().then(() => {
   const q = new URLSearchParams(location.search);
-  if (q.has('auto')) {
+  if (q.has('room')) {
+    SETUP.hidden = true;
+    net.connect(q.get('room').toUpperCase()).catch(() => { SETUP.hidden = false; toast('เข้าห้องไม่สำเร็จ'); });
+  } else if (q.has('auto')) {
     newGame({ mode: q.get('mode') || 'bot', level: q.get('level') || 'medium' });
   } else {
     SETUP.hidden = false;

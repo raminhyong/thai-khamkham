@@ -322,6 +322,24 @@ table.log th, table.log td { padding: 7px 8px; border-bottom: 1px solid #eceff6;
 table.log th { color: var(--muted); font-weight: 600; font-size: 12px; }
 .rack .empty { font-size: 12px; color: var(--muted); padding: 10px; }
 
+/* ---------- ออนไลน์ / ห้อง ---------- */
+.room-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; font-size: 13px; margin: 0 0 8px;
+}
+.room-bar[hidden] { display: none; }
+.room-bar strong { font-size: 16px; letter-spacing: 1px; color: var(--accent); }
+.sep { border: 0; border-top: 1px solid #e8ecf5; margin: 16px 0 12px; }
+.row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.code {
+  width: 110px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid #dfe4ef; font-size: 15px; letter-spacing: 2px;
+  text-transform: uppercase; text-align: center;
+}
+.small { font-size: 12px; }
+.opt.small { padding: 8px 10px; font-size: 13px; }
+.btn-sm { padding: 9px 12px; font-size: 13px; }
+
 /* ---------- จอใหญ่ (แท็บเล็ตแนวนอน / คอม) ---------- */
 @media (min-width: 900px) {
   .app { min-height: 100vh; justify-content: center; padding: 20px 24px; gap: 12px; }
