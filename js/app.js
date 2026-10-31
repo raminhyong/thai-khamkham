@@ -37,6 +37,9 @@ const net = new Net({
 
 function applyView(view, rack) {
   if (!view) return;
+  if (new URLSearchParams(location.search).has('debug')) {
+    document.title = `ROOM:${view.code} n=${view.names.length} st=${view.status}`;
+  }
   state.netMode = true;
   state.roomCode = view.code;
   state.board = view.board;

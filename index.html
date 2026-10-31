@@ -6,6 +6,11 @@
 <title>คำคม · เกมฝึกคำศัพท์ภาษาไทย</title>
 <meta name="description" content="เกมคำคมตามกติกาทางการ — กระดาน 15x9 ตรวจคำกับพจนานุกรมราชบัณฑิตฯ ฝึกนักเรียนกับบอท" />
 <link rel="stylesheet" href="css/style.css" />
+<script>
+  // เก็บ error ไว้ใน <title> เพื่อดีบักบนเครื่องที่ไม่มี console
+  window.addEventListener('error', (e) => { document.title = 'ERR: ' + (e.message || e.type); });
+  window.addEventListener('unhandledrejection', (e) => { document.title = 'REJ: ' + (e.reason?.message || e.reason); });
+</script>
 </head>
 <body>
 <div class="app">
@@ -62,6 +67,7 @@
     <button id="btn-room-start" class="btn btn-primary btn-sm" type="button">เริ่มเล่น</button>
   </div>
 
+  <div id="dbg" hidden></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- หน้าตั้งเกม -->
@@ -117,6 +123,8 @@
 <script>
   if (new URLSearchParams(location.search).has('debug')) {
     addEventListener('load', () => setTimeout(() => {
+      const dbgEl = document.getElementById('dbg');
+      if (dbgEl) dbgEl.textContent = window.__dbg || 'none';
       const b = document.getElementById('board');
       document.title = JSON.stringify({
         vw: innerWidth,

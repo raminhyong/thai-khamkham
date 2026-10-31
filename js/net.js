@@ -21,29 +21,44 @@ export class Net {
 
   connect(code) {
     this.code = code;
+    if (location.search.includes('debug')) window.__dbg = (window.__dbg || '') + `connecting ${code};`;
     const url = `${NET_BASE.replace('https', 'wss')}/api/room/${code}/ws`;
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(url);
       this.ws = ws;
       ws.onopen = () => {
+        clearTimeout(guard);
         const saved = localStorage.getItem('kk_playerId');
         ws.send(JSON.stringify({
           type: 'join',
           name: localStorage.getItem('kk_name') || 'ผู้เล่น',
           playerId: saved || undefined,
         }));
+        if (location.search.includes('debug')) window.__dbg = (window.__dbg || '') + 'open;';
         this.handlers.onStatus?.('connected');
         resolve();
       };
+      // กันเคสเชื่อมต่อค้าง: ถ้า 8 วินาทียังไม่เปิด ให้แจ้งและปิด
+      const guard = setTimeout(() => {
+        if (ws.readyState !== 1) {
+          this.handlers.onError?.('เชื่อมต่อห้องไม่สำเร็จ (หมดเวลา)');
+          try { ws.close(); } catch { /* ignore */ }
+          reject(new Error('timeout'));
+        }
+      }, 8000);
+
       ws.onerror = (e) => {
+        clearTimeout(guard);
+        if (location.search.includes('debug')) window.__dbg = (window.__dbg || '') + 'error;';
         this.handlers.onError?.('เชื่อมต่อห้องไม่สำเร็จ');
         reject(e);
       };
-      ws.onclose = () => { this.handlers.onStatus?.('closed'); };
+      ws.onclose = (e) => { if (location.search.includes('debug')) window.__dbg = (window.__dbg || '') + `closed ${e.code};`; this.handlers.onStatus?.('closed'); };
       ws.onmessage = (ev) => {
         let m;
         try { m = JSON.parse(ev.data); } catch { return; }
         if (m.type === 'joined') {
+          if (location.search.includes('debug')) window.__dbg = (window.__dbg || '') + 'joined;';
           this.playerId = m.playerId;
           localStorage.setItem('kk_playerId', m.playerId);
           this.handlers.onJoined?.(m);
